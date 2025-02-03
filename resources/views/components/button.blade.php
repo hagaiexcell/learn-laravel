@@ -1,0 +1,4 @@
+<div>
+    tes
+    {{ $slot }}
+</div>
