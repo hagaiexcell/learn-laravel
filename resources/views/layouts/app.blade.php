@@ -13,7 +13,8 @@
     <!-- 00. Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid col-md-7">
-            <div class="navbar-brand">Simple To Do List</div>
+            <div class="navbar-brand">
+                <a href="/todo">Simple To Do List</a></div>
             
             <div class="navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">

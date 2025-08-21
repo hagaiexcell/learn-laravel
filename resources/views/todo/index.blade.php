@@ -3,6 +3,10 @@
 @section('content')
     <!-- 01. Content-->
     <h1 class="text-center mb-4">To Do List</h1>
+    @if(Auth::user()->isAdmin())
+        <div class="text-center mb-4 text-lg font-bold">Anda Adalah Admin</div>
+    @endif
+   
     <div class="row justify-content-center">
         <div class="col-md-8">
         <div class="card mb-3">
@@ -24,15 +28,44 @@
                 @endif
                 <form id="todo-form" action="{{ route('todo.post') }}" method="post">
                     @csrf
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" name="task" id="todo-input"
-                            placeholder="Tambah task baru" required value="{{ old('task') }}">
-                        <button class="btn btn-primary" type="submit">
-                            Simpan
-                        </button>
+                    <div class="input-group grid grid-cols-8 gap-3 mb-3">
+                        <div class="col-span-5">
+                            <input type="text" class="form-control " name="task" id="todo-input"
+                                placeholder="Tambah task baru" required value="{{ old('task') }}">
+                        </div>
+                        <div class="col-span-2">
+                            <select class="form-control" name="category" id="">
+                                @foreach($categories as $cat)
+                                    <option def value="{{ $cat->id }}">
+                                        {{ $cat->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-span-1">
+                            <button class="btn btn-primary w-full" type="submit">
+                                Simpan
+                            </button>
+                        </div>
+                    </div>
+                    <div class="h-32">
+                        <textarea name="description" id="description" placeholder="description..." cols="10" rows="10" class="form-control w-full h-full"></textarea>
                     </div>
                 </form>
             </div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="flex gap-2">
+                        @foreach ($categories as $cat)
+                            <div class="bg-slate-200 cursor-pointer p-1 rounded-lg text-sm">
+                                <a href="{{ route('category', ['category' => $cat->slug]) }}">
+                                    {{ $cat->name }}
+                                </a>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
             <div class="card">
                 <div class="card-body">
@@ -50,51 +83,7 @@
                     <ul class="list-group mb-4" id="todo-list">
                         <!-- 04. Display Data -->
                         @foreach($data as $todo)
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span class="task-text">
-                                    {!! $todo->is_done == '1'?'<del>':'' !!}
-                                    {{ $todo->task }}
-                                    {!! $todo->is_done == '1'?'</del>':'' !!}
-
-                                </span>
-                                <input type="text" class="form-control edit-input" style="display: none;"
-                                    value="{{ $todo->task }}">
-                                <div class="btn-group">
-                                    <form action="{{ route('todo.delete',['id'=>$todo->id]) }}" method="POST" onsubmit="return confirm('Yakin Menghapus Data Ini?')">
-                                        @csrf
-                                        @method('delete')
-                                        <button type="submit" class="btn btn-danger btn-sm delete-btn">✕</button>
-                                    </form>
-                                    <button class="btn btn-primary btn-sm edit-btn" data-bs-toggle="collapse"
-                                        data-bs-target="#collapse-{{ $todo->id }}" aria-expanded="false">✎</button>
-                                </div>
-                            </li>
-                            <!-- 05. Update Data -->
-                            <li class="list-group-item collapse" id="collapse-{{ $todo->id }}">
-                                <form action="{{ route('todo.update',['id'=>$todo->id]) }}" method="POST">
-                                    @csrf
-                                    @method('put')
-                                    <div>
-                                        <div class="input-group mb-3">
-                                            <input type="text" class="form-control" name="task"
-                                                value="{{ $todo->task }}">
-                                            <button class="btn btn-outline-primary" type="submit">Update</button>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex">
-                                        <div class="radio px-2">
-                                            <label>
-                                                <input type="radio" value="1" name="is_done" {{ $todo->is_done == '1' ? 'checked':'' }}> Selesai
-                                            </label>
-                                        </div>
-                                        <div class="radio">
-                                            <label>
-                                                <input type="radio" value="0" name="is_done" {{ $todo->is_done == '0' ? 'checked':'' }}> Belum
-                                            </label>
-                                        </div>
-                                    </div>
-                                </form>
-                            </li>
+                            <x-card :todo="$todo"/>
                         @endforeach
                     </ul>
                     {{ $data->links() }}
@@ -103,3 +92,25 @@
         </div>
     </div>
 @endsection
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".edit-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                let targetId = this.getAttribute("data-bs-target");
+                let targetElement = document.getElementById(targetId);
+
+                console.log(targetId,targetElement,'o');
+
+                // Toggle class Tailwind hidden/block
+                if (targetElement.classList.contains("hidden")) {
+                    targetElement.classList.remove("hidden");
+                    targetElement.classList.add("block");
+                } else {
+                    targetElement.classList.remove("block");
+                    targetElement.classList.add("hidden");
+                }
+            });
+        });
+    });
+</script>
